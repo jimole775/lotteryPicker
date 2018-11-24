@@ -8,6 +8,7 @@ function analyzing(htmlStr){
     let result = [];
     trs.each(function(index,tr){
         let frontNumbers = [];
+        console.log(tr);
         $(tr).find('.red').each(function(j,td){
             frontNumbers.push($(td).text());
         });
@@ -19,7 +20,6 @@ function analyzing(htmlStr){
         if(frontNumbers.length && behindNumbers.length)
         result.push(frontNumbers.concat(behindNumbers));
     });
-    console.log(result);
 
     return result;
 }

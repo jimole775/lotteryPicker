@@ -1,39 +1,45 @@
-const fs = require('fs');
-const analyzingHtml = require('./analyzingHtml');
-const Request = require('./requestLogic');
-const pages = 89;
 
-for(var i = 1;i<pages;i++){
-    let dirStr = '/historykj';
-    let pathStr = '/history_' + 1 + '.jspx';
-    let queryStr = '?_ltype=dlt';
-    
-    fetching(dirStr + pathStr + queryStr);
+debugger;
+const saveData = require('./app/saveData.js');
+const RequestHtml = require('./app/requestHtml.js');
+const analyzingHtml = require('./app/analyzingHtml.js');
+
+const pageSize = 89;
+
+async function batchFetch(){
+    for(let i = 1;i<=pageSize;i++){
+        console.log('循环次数：',i);
+        let dirStr = '/historykj';
+        let pathStr = '/history_' + i + '.jspx';
+        let queryStr = '?_ltype=dlt';
+        await fetching(dirStr + pathStr + queryStr);
+    }
 }
 
-async function fetching(path){
+batchFetch();
 
-    const req = new Request();
+function fetching(path){
+    return new Promise(function(resolve){
+        const req = new RequestHtml();
 
-    const options = {
-        protocal:"http:",
-        path: path,
-        hostname: 'www.lottery.gov.cn',
-        port: 80,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    };
-    
-    await req.fetch(options,function(htmlChunk){
-        const ws = fs.createWriteStream(__dirname + '/result.txt', 'utf-8');
-        const peerPageNumbers = analyzingHtml(htmlChunk.toString());
-        peerPageNumbers.forEach(function(item){
-            ws.write(item.toString() + '\n\r');
-        });    
-        ws.end();
-    });
+        const options = {
+            protocal:"http:",
+            path: path,
+            hostname: 'www.lottery.gov.cn',
+            port: 80,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        };
+        
+        req.fetch(options,function(htmlChunk){              
+            saveData(analyzingHtml(htmlChunk.toString()), pageSize);
+            setTimeout(function(){
+                resolve();
+            },500);
+        });
+    });    
 }
 
 
