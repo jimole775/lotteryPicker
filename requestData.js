@@ -1,5 +1,4 @@
 
-debugger;
 const saveData = require('./app/saveData.js');
 const RequestHtml = require('./app/requestHtml.js');
 const analyzingHtml = require('./app/analyzingHtml.js');
@@ -37,7 +36,7 @@ function fetching(path){
             saveData(analyzingHtml(htmlChunk.toString()), pageSize);
             setTimeout(function(){
                 resolve();
-            },500);
+            },1000);
         });
     });    
 }

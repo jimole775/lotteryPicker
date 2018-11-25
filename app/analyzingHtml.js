@@ -3,21 +3,20 @@ const cheerio = require('cheerio');
 
 function analyzing(htmlStr){
     const $ = cheerio.load(htmlStr);
-    const table = $('table');
-    const trs = table.find('tr');
+    const tbody = $('table').find('tbody');
+    const trs = tbody.find('tr');
     let result = [];
     trs.each(function(index,tr){
-        let frontNumbers = [];
-        console.log(tr);
-        $(tr).find('.red').each(function(j,td){
-            frontNumbers.push($(td).text());
-        });
-
+        let frontNumbers = [];        
         let behindNumbers = [];
-        $(tr).find('.blue').each(function(j,td){
-            behindNumbers.push("#" + $(td).text());
+        tr.children.forEach(function(td,index){  
+            if(td.type === 'tag' && td.name === 'td' && td.attribs){
+                var [{text,data}] = td.children;
+                var attribs = JSON.stringify(td.attribs); 
+                if(attribs.indexOf('red') > -1 && data)frontNumbers.push(data.trim().substr(0,2));
+                if(attribs.indexOf('blue') > -1 && data)behindNumbers.push("#" + data.trim().substr(0,2));                
+            }
         });
-        if(frontNumbers.length && behindNumbers.length)
         result.push(frontNumbers.concat(behindNumbers));
     });
 
