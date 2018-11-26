@@ -1,4 +1,5 @@
 const readline = require('readline');
+const amountData = require('./app/amount.js');
 const fs = require('fs');
 const rs = fs.createReadStream('./db/result.txt');
 const rl = readline.createInterface({
@@ -22,31 +23,10 @@ rl.on('line', (line) => {
     rowIndex++;
 });
 
-let frontModel = new Array(35).fill({}).map((item,index)=>{return {[index + 1]:0}});
-let behindModel = new Array(12).fill({}).map((item,index)=>{return {[index + 1]:0}});
-
 rs.on('end',function(){
     
-    fronts.forEach((peerTerm)=>{
-        peerTerm.forEach(function(single){
-            if(single){
-                let model = frontModel[single-1];
-                model[single] ++;
-            }
-        });
-    });
+    amountData(fronts,behinds);
 
-    behinds.forEach((peerTerm,index)=>{
-        peerTerm.forEach(function(single){            
-            if(single){
-                let model = behindModel[single-1];
-                model[single] ++;
-            }
-        });
-    });
-
-    print(JSON.stringify(frontModel));
-    print(JSON.stringify(behindModel));
 });
 
 function print(data){
