@@ -1,8 +1,5 @@
 const fs = require('fs');
 
-// let frontModel = new Array(35);
-// let behindModel = new Array(12);
-
 let frontModel = fillData(35);
 let behindModel = fillData(12);
 
@@ -29,8 +26,8 @@ module.exports =  function (fronts,behinds){
         });
     });
 
-    fs.writeFile('./db/fronts_amount.txt',JSON.stringify(frontModel));
-    fs.writeFile('./db/behinds_amount.txt',JSON.stringify(behindModel));
+    fs.writeFile('./db/fronts_amount.json',JSON.stringify(frontModel));
+    fs.writeFile('./db/behinds_amount.json',JSON.stringify(behindModel));
 }
 
 function fillData(len){

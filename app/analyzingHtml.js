@@ -1,10 +1,15 @@
 
 const cheerio = require('cheerio');
 
+
 function analyzing(htmlStr){
-    const $ = cheerio.load(htmlStr);
-    const tbody = $('table').find('tbody');
-    const trs = tbody.find('tr');
+    const tbodyStartIndex = htmlStr.indexOf('<tbody ');
+    const tbodyEndIndex = htmlStr.indexOf('</tbody>');
+    // const $ = cheerio.load(htmlStr);
+    // const tbody = $('table').find('tbody');
+    // const trs = tbody.find('tr');
+    const tbodyHtmlStr = htmlStr.substring(tableStartIndex,tableEndIndex);
+
     let result = [];
     trs.each(function(index,tr){
         let frontNumbers = [];        
