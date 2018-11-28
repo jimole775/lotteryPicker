@@ -28,6 +28,7 @@ function analyzing(htmlStr){
     let peerItram = [];
     let behindItraor = 0;
     frontTDArray.forEach((item,index)=>{
+        console.log('aaa:',item);
         peerItram.push(item); 
         if(index%5 === 0){
             peerItram.push(behindTDArray[behindItraor++]);
