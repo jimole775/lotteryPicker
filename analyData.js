@@ -1,7 +1,7 @@
 const readline = require('readline');
-const amountData = require('./app/amount.js');
+const createSumForm = require('./app/analyData/createSumForm.js');
 const fs = require('fs');
-const rs = fs.createReadStream('./db/result.txt');
+const rs = fs.createReadStream('./db/amount.txt');
 const rl = readline.createInterface({
     input: rs,
     crlfDelay: Infinity
@@ -25,7 +25,7 @@ rl.on('line', (line) => {
 
 rs.on('end',function(){
     
-    amountData(fronts,behinds);
+    createSumForm(fronts,behinds);
 
 });
 
