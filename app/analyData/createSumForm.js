@@ -26,8 +26,8 @@ module.exports =  function (fronts,behinds){
         });
     });
 
-    fs.writeFile('./db/fronts_amount.json',JSON.stringify(frontModel));
-    fs.writeFile('./db/behinds_amount.json',JSON.stringify(behindModel));
+    fs.writeFile('./db/front_sum.json',JSON.stringify(frontModel));
+    fs.writeFile('./db/behind_sum.json',JSON.stringify(behindModel));
 }
 
 function fillData(len){

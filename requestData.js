@@ -1,7 +1,7 @@
 
-const saveData = require('./app/saveData.js');
-const RequestHtml = require('./app/requestHtml.js');
-const analyzingHtml = require('./app/analyzingHtml.js');
+const saveData = require('./app/requestData/saveData.js');
+const RequestHtml = require('./app/requestData/requestHtml.js');
+const analyzingHtml = require('./app/requestData/analyzingHtml.js');
 
 const pageSize = 89;
 
