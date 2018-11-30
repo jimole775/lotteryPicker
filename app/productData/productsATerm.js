@@ -1,6 +1,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const verifySeriesNum = require('./verifyNumSeries.js');
 // 10000000组 tenMillion.json
 // 1000000组 oneMillion.json
 // 100000组 hundredThousand.json
@@ -20,6 +21,40 @@ let hundredBatch = 100;
 let tenBatch = 10;
 let theOneBatch = 1;       
 
+function logAwardState(data){
+    console.log(JSON.stringify(data));
+    fs.appendFile(path.resolve(__dirname,'../../db/awardState.log'), JSON.stringify(data), 'utf8', (err) => {
+        if (err) throw err;
+    });  
+    // resetDataModel(data);
+}
+
+function resetDataModel(data){
+
+    data = {
+        no1:{
+            awardTimes:0,  
+            awardDistance:[],
+            rollTimes:0
+        },
+        no2:{
+            awardTimes:0,  
+            awardDistance:[],
+            rollTimes:0                      
+        },
+        no3:{
+            awardTimes:0,  
+            awardDistance:[],
+            rollTimes:0                     
+        },
+        no4:{
+            awardTimes:0,  
+            awardDistance:[],
+            rollTimes:0                      
+        }
+    };
+}
+
 fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),function(err,frontData){
     fs.readFile(path.resolve(__dirname,'../../db/behind_rate_foundation.json'),function(err,behindData){     
         const frontRateFoun = JSON.parse(frontData.toString());
@@ -28,7 +63,7 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
         matchRightBatch([5,11,16,28,35],[6,9]);
         function building(type,times){
             let i = times;
-            const ws = fs.createWriteStream(path.resolve(__dirname,'../../db/',type + '.txt'),'utf8');
+            const ws = fs.createWriteStream(path.resolve(__dirname,'../../db/',type + '.log'),'utf8');
             while(i--){
                 ws.write(createABatch().toString() + '\r\n');
             }
@@ -37,12 +72,42 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
 
         function matchRightBatch(fronts,behinds){
             let keepFetch = true;
-            let rollTimes = 0;
+            let awardState = {
+                no1:{
+                    awardTimes:0,  
+                    awardDistance:[],
+                    rollTimes:0
+                },
+                no2:{
+                    awardTimes:0,  
+                    awardDistance:[],
+                    rollTimes:0                      
+                },
+                no3:{
+                    awardTimes:0,  
+                    awardDistance:[],
+                    rollTimes:0                     
+                },
+                no4:{
+                    awardTimes:0,  
+                    awardDistance:[],
+                    rollTimes:0                      
+                }
+            };
             while(keepFetch){
-                rollTimes++;
+                awardState.no1.rollTimes++;
+                awardState.no2.rollTimes++;
+                awardState.no3.rollTimes++;
+                awardState.no4.rollTimes++;
                 let frontMatchedTimes = 0;
                 let behindMatchedTimes = 0;
-                let batch = createABatch();                    
+                let batch = createABatch();   
+                var seriesItem = verifySeriesNum(batch);
+
+                if(seriesItem.length > 2){
+                    continue;
+                }
+
                 batch.forEach(function(item,index){
                     if(index < 5 && fronts.includes(item)){
                         frontMatchedTimes ++;
@@ -50,17 +115,38 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                         behindMatchedTimes ++;
                     }
                 });
+
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 2){
-                    keepFetch = false;
-                    console.log('摇奖完成，摇了'+rollTimes+'次，终于中得一等奖',batch.toString());
+                    console.log('中得一等奖',batch.toString());           
+                    awardState.no1.awardTimes ++;
+                    awardState.no1.awardDistance.push(awardState.no1.rollTimes);    
+                    awardState.no1.rollTimes = 0;                    
+                    logAwardState(awardState);   
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 1){   
-                    console.log('摇奖完成，摇了'+rollTimes+'次，终于中得二等奖',batch.toString());
+                    console.log('中得二等奖',batch.toString());   
+                    awardState.no2.awardTimes ++;
+                    awardState.no2.awardDistance.push(awardState.no2.rollTimes);
+                    awardState.no2.rollTimes = 0;                   
+                    logAwardState(awardState);       
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 0
                     || frontMatchedTimes === 4 && behindMatchedTimes === 2){   
-                    console.log('摇奖完成，摇了'+rollTimes+'次，终于中得三等奖',batch.toString());
+                        console.log('中得三等奖',batch.toString()); 
+                    awardState.no3.awardTimes ++;
+                    awardState.no3.awardDistance.push(awardState.no3.rollTimes);
+                    awardState.no3.rollTimes = 0;                  
+                    logAwardState(awardState);       
                 } 
+                if(frontMatchedTimes === 4 && behindMatchedTimes === 1
+                    || frontMatchedTimes === 3 && behindMatchedTimes === 2){   
+                        console.log('中得四等奖',batch.toString());   
+                    awardState.no4.awardTimes ++;
+                    awardState.no4.awardDistance.push(awardState.no4.rollTimes);
+                    awardState.no4.rollTimes = 0;                  
+                    logAwardState(awardState);         
+                } 
+
             }
         }
 
@@ -82,7 +168,8 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 }
             }   
             fronts = fronts.sort(function(a,b){return a-b});
-            behinds = behinds.sort(function(a,b){return a-b});
+            behinds = behinds.sort(function(a,b){return a-b});         
+
             return fronts.concat(behinds);
         }
         
