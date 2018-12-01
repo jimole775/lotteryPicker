@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const verifySeriesNum = require('./verifyNumSeries.js');
+const intervalWriter = require('../utils/intervalWriter.js');
 // 10000000组 tenMillion.json
 // 1000000组 oneMillion.json
 // 100000组 hundredThousand.json
@@ -20,41 +21,6 @@ let oneThousandBatch = 1000;
 let hundredBatch = 100;
 let tenBatch = 10;
 let theOneBatch = 1;       
-
-function logAwardState(data){
-    console.log(JSON.stringify(data));
-    fs.appendFile(path.resolve(__dirname,'../../db/awardState.log'), JSON.stringify(data), 'utf8', (err) => {
-        if (err) throw err;
-    });  
-    // resetDataModel(data);
-}
-
-function resetDataModel(data){
-
-    data = {
-        no1:{
-            awardTimes:0,  
-            awardDistance:[],
-            rollTimes:0
-        },
-        no2:{
-            awardTimes:0,  
-            awardDistance:[],
-            rollTimes:0                      
-        },
-        no3:{
-            awardTimes:0,  
-            awardDistance:[],
-            rollTimes:0                     
-        },
-        no4:{
-            awardTimes:0,  
-            awardDistance:[],
-            rollTimes:0                      
-        }
-    };
-}
-
 fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),function(err,frontData){
     fs.readFile(path.resolve(__dirname,'../../db/behind_rate_foundation.json'),function(err,behindData){     
         const frontRateFoun = JSON.parse(frontData.toString());
@@ -95,10 +61,6 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 }
             };
             while(keepFetch){
-                awardState.no1.rollTimes++;
-                awardState.no2.rollTimes++;
-                awardState.no3.rollTimes++;
-                awardState.no4.rollTimes++;
                 let frontMatchedTimes = 0;
                 let behindMatchedTimes = 0;
                 let batch = createABatch();   
@@ -107,7 +69,6 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 if(seriesItem.length > 2){
                     continue;
                 }
-
                 batch.forEach(function(item,index){
                     if(index < 5 && fronts.includes(item)){
                         frontMatchedTimes ++;
@@ -116,38 +77,40 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                     }
                 });
 
+                awardState.no1.rollTimes++;
+                awardState.no2.rollTimes++;
+                awardState.no3.rollTimes++;
+                awardState.no4.rollTimes++;
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 2){
                     console.log('中得一等奖',batch.toString());           
-                    awardState.no1.awardTimes ++;
-                    awardState.no1.awardDistance.push(awardState.no1.rollTimes);    
-                    awardState.no1.rollTimes = 0;                    
-                    logAwardState(awardState);   
+                    afterAwarded(awardState.no1,1);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 1){   
                     console.log('中得二等奖',batch.toString());   
-                    awardState.no2.awardTimes ++;
-                    awardState.no2.awardDistance.push(awardState.no2.rollTimes);
-                    awardState.no2.rollTimes = 0;                   
-                    logAwardState(awardState);       
+                    afterAwarded(awardState.no2,2);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 0
                     || frontMatchedTimes === 4 && behindMatchedTimes === 2){   
-                        console.log('中得三等奖',batch.toString()); 
-                    awardState.no3.awardTimes ++;
-                    awardState.no3.awardDistance.push(awardState.no3.rollTimes);
-                    awardState.no3.rollTimes = 0;                  
-                    logAwardState(awardState);       
+                        afterAwarded(awardState.no3,3);  
                 } 
                 if(frontMatchedTimes === 4 && behindMatchedTimes === 1
-                    || frontMatchedTimes === 3 && behindMatchedTimes === 2){   
-                        console.log('中得四等奖',batch.toString());   
-                    awardState.no4.awardTimes ++;
-                    awardState.no4.awardDistance.push(awardState.no4.rollTimes);
-                    awardState.no4.rollTimes = 0;                  
-                    logAwardState(awardState);         
+                    || frontMatchedTimes === 3 && behindMatchedTimes === 2){ 
+                        afterAwarded(awardState.no4,4);    
                 } 
 
             }
+        }
+        function afterAwarded(awardStateTab,awardLevel){
+ 
+            awardStateTab.awardTimes ++;
+            awardStateTab.awardDistance.push(awardStateTab.rollTimes);
+            awardStateTab.rollTimes = 0;    
+            var writeData = `awardTimes:${awardStateTab.awardTimes} awardDistance:${JSON.stringify(awardStateTab.awardDistance)}`;        
+            new intervalWriter(`awardState.no${awardLevel}`,writeData,function(){
+                awardStateTab.awardTimes = 0;
+                awardStateTab.awardDistance = [];
+                awardStateTab.rollTimes = 0;   
+            });   
         }
 
         function createABatch(){

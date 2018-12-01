@@ -1,8 +1,6 @@
-
-
 const fs = require('fs');
 const path = require('path');
-
+const intervalWriter = require('../utils/intervalWriter.js');
 let seriesMap = {};
 module.exports = function(aTerm){
     //五连号
@@ -11,8 +9,10 @@ module.exports = function(aTerm){
     //二连号，梯级二连号
     let seriesItems = [];
     aTerm.forEach(function(item,index){
-        if(aTerm[index+1] && aTerm[index] - aTerm[index+1] === -1){
-            seriesItems.push(item);
+        var nextItem = aTerm[index+1];
+        if( nextItem && item - nextItem === -1){
+            if(!seriesItems.includes(item))seriesItems.push(item);
+            if(!seriesItems.includes(nextItem))seriesItems.push(nextItem);
         };
     });
 
@@ -23,10 +23,14 @@ module.exports = function(aTerm){
         }else{
             seriesMap[key] = 0;
         }
-    }
+        const writeData = `${key}:${seriesMap[key]}`;
 
-    fs.appendFile(path.resolve(__dirname,'../../db/seriesTimesWhenCreating.log'), JSON.stringify(seriesMap), 'utf8', (err) => {
-        if (err) throw err;
-    });
+        new intervalWriter('seriesNumState',writeData,function(){
+            seriesMap = {};
+        });
+    }
+    
+    
     return seriesItems;
 }
+

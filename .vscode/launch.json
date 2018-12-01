@@ -11,6 +11,7 @@
             // "program": "${workspaceFolder}\\app\\analyData\\createRateFoundation.js"
             // "program": "${workspaceFolder}\\analyData.js"
             // "program": "${workspaceFolder}\\requestData.js"
+            // "program": "${workspaceFolder}\\test.js"
             "program": "${workspaceFolder}\\app\\productData\\productsATerm.js"
         }
     ]
