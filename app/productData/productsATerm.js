@@ -87,15 +87,15 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 1){   
                     console.log('中得二等奖',batch.toString());   
-                    afterAwarded(awardState.no2,2);  
+                    // afterAwarded(awardState.no2,2);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 0
                     || frontMatchedTimes === 4 && behindMatchedTimes === 2){   
-                        afterAwarded(awardState.no3,3);  
+                        // afterAwarded(awardState.no3,3);  
                 } 
                 if(frontMatchedTimes === 4 && behindMatchedTimes === 1
                     || frontMatchedTimes === 3 && behindMatchedTimes === 2){ 
-                        afterAwarded(awardState.no4,4);    
+                        // afterAwarded(awardState.no4,4);    
                 } 
 
             }
@@ -105,8 +105,8 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
             awardStateTab.awardTimes ++;
             awardStateTab.awardDistance.push(awardStateTab.rollTimes);
             awardStateTab.rollTimes = 0;    
-            var writeData = `awardTimes:${awardStateTab.awardTimes} awardDistance:${JSON.stringify(awardStateTab.awardDistance)}`;        
-            new intervalWriter(`awardState.no${awardLevel}`,writeData,function(){
+            var writeData = `awardState.no${awardLevel} awardDistance:${JSON.stringify(awardStateTab.awardDistance)}\n`;        
+            intervalWriter(`awardState`,writeData,function(){
                 awardStateTab.awardTimes = 0;
                 awardStateTab.awardDistance = [];
                 awardStateTab.rollTimes = 0;   

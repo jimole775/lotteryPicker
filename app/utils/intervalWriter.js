@@ -3,28 +3,27 @@ const fs = require('fs');
 const path = require('path');
 let writeDistance = 10;
 let runStartTime = new Date().getTime();
-module.exports = class Writer{
-    constructor(fileName,data,callback){
+module.exports = function(fileName,data,callback){
 
-        if(this.isWaitingEnd()){
-            try{
+        if(isWaitingEnd()){
+
             const originPath = path.resolve(__dirname,`../../db/${fileName}.log`);
           
-            fs.appendFileSync(originPath,JSON.stringify(data),'utf8',function(err){
-                console.log('写了一次');
-                if(err)console.log(err);
-            });   
+            fs.appendFileSync(originPath,data,'utf8');   
                 
-    
-        }catch(err){console.log(err);}
+            tools.isFunction(callback)?callback():null;
         }
 
     }     
-
-    isWaitingEnd(){
-        const nowTime = new Date().getTime();
-        if(nowTime - runStartTime >= writeDistance * 1000){
-            return runStartTime = nowTime;
-        }
+function isWaitingEnd(){
+    const nowTime = new Date().getTime();
+    if(nowTime - runStartTime >= writeDistance * 1000){
+        runStartTime = nowTime;
+        return true;
+    }else{
+        return false;
     }
+
 }
+
+

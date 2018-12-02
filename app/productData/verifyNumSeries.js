@@ -23,11 +23,9 @@ module.exports = function(aTerm){
         }else{
             seriesMap[key] = 0;
         }
-        const writeData = `${key}:${seriesMap[key]}`;
-
-        new intervalWriter('seriesNumState',writeData,function(){
-            seriesMap = {};
-        });
+        // const writeData = `${key}:${seriesMap[key]}\n`;
+        // intervalWriter('seriesNumState',writeData);
+        // seriesMap = {};
     }
     
     
