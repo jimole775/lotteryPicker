@@ -93,7 +93,7 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 awardState.no2.peerAwardInRollTimes++;
                 awardState.no3.peerAwardInRollTimes++;
                 awardState.no4.peerAwardInRollTimes++;
-                if(frontMatchedTimes === 5 && behindMatchedTimes === 2){       
+                if(frontMatchedTimes === 5 && behindMatchedTimes === 2){  
                     afterAwarded(awardState.no1,1,awardState.rollTimeSum);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 1){   
@@ -105,7 +105,7 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 } 
                 if(frontMatchedTimes === 4 && behindMatchedTimes === 1
                     || frontMatchedTimes === 3 && behindMatchedTimes === 2){ 
-                        afterAwarded(awardState.no4,4,awardState.rollTimeSum);    
+                        // afterAwarded(awardState.no4,4,awardState.rollTimeSum);    
                 } 
 
             }
@@ -124,15 +124,10 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 3:no3Writer,
                 4:no4Writer
             }        
-            writerMap[awardLevel].write(writeData,function(){
-                reset();
-            });              
-            
-            function reset(){
-                awardStateTab.awardTimes = 0;
-                awardStateTab.awardDistance.length = 0;
-                awardStateTab.peerAwardInRollTimes = 0;   
-            }
+            awardStateTab.awardTimes = 0;
+            awardStateTab.awardDistance.length = 0;
+            awardStateTab.peerAwardInRollTimes = 0;   
+            writerMap[awardLevel].write(writeData)
         }
 
         function createABatch(){

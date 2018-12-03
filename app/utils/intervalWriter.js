@@ -5,22 +5,28 @@ const path = require('path');
 module.exports = class IntervalWriter{
 
         constructor(fileName){
+            this.cacheBuffer = [];
             this.fileName = fileName;
             this.writeDistance = 10;   
             this.runStartTime = new Date().getTime();
         }
 
         write(data,callback){
+            
             if(this.isWaitingEnd()){
    
                 console.log(`writed：${this.fileName} at `,tools.dateFormat('mm:ss')); 
 
                 const originPath = path.resolve(__dirname,`../../db/${this.fileName}`);
               
-                fs.appendFileSync(originPath,data,'utf8');   
+                fs.appendFileSync(originPath,this.cacheBuffer.toString(),'utf8');   
                     
+                this.cacheBuffer.length = 0;
+                
                 tools.isFunction(callback)?callback():null;
                 
+            }else{
+                this.cacheBuffer.push(Buffer.from(data));
             }
         }
         isWaitingEnd(){

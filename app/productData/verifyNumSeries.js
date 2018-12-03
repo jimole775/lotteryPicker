@@ -11,7 +11,6 @@ module.exports = function(aTerm){
     //二连号，梯级二连号
     let frontSeries = [];
     let behindSeries = [];
-
     aTerm.forEach(function(item,index){
         if(index <=4){
             let nextIndex = index+1 > 4 ? 4 : index+1; 
@@ -33,32 +32,33 @@ module.exports = function(aTerm){
 
     const frontKey = frontSeries.toString();
     const behindkey = behindSeries.toString();
-    if(frontKey || behindkey){
-
-        if(frontKey){
-            if(frontSeriesMap[frontKey] === undefined){           
-                frontSeriesMap[frontKey] = 1;
-            }
-            else if(frontSeriesMap[frontKey]){
-                frontSeriesMap[frontKey] ++;
-            }
+    if(frontKey){
+        if(frontSeriesMap[frontKey] === undefined){           
+            frontSeriesMap[frontKey] = 1;
         }
+        else if(frontSeriesMap[frontKey]){
+                frontSeriesMap[frontKey] ++;
+        }
+    }
+    if(behindkey){
 
-        if(behindkey){
-            if(behindSeriesMap[behindkey] === undefined){           
-                behindSeriesMap[behindkey] = 1;
-            }
-            else if(behindSeriesMap[behindkey]){
+        if(behindSeriesMap[behindkey] === undefined){           
+            behindSeriesMap[behindkey] = 1;
+        }
+        else if(behindSeriesMap[behindkey]){
                 behindSeriesMap[behindkey] ++;
             }
-        }
-        writeDataString = `[${frontKey}]: ${frontSeriesMap[frontKey]} [${behindkey}]:${behindSeriesMap[behindkey]}`;
-        writer.write(writeData,function(){ 
-            seriesMap = {};
-        });
+        
     }
-    
-    
+        
+    if(frontSeriesMap[frontKey] >= 100000 || behindSeriesMap[behindkey] >= 100000){
+        
+        let writeData = '';
+            if(frontKey){writeData += `[${frontKey}]:${frontSeriesMap[frontKey]}\n`;frontSeriesMap[frontKey] = 1}       
+            if(behindkey){writeData = writeData.replace(/\n/,' ') + `#[${behindkey}]:${behindSeriesMap[behindkey]}\n`;behindSeriesMap[behindkey] = 1}
+            writer.write(writeData); 
+    }
+   
     return frontSeries;
 }
 
