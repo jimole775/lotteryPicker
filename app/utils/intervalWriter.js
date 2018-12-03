@@ -1,29 +1,38 @@
 const tools = require('./tools.js');
 const fs = require('fs');
 const path = require('path');
-let writeDistance = 10;
-let runStartTime = new Date().getTime();
-module.exports = function(fileName,data,callback){
 
-        if(isWaitingEnd()){
+module.exports = class IntervalWriter{
 
-            const originPath = path.resolve(__dirname,`../../db/${fileName}.log`);
-          
-            fs.appendFileSync(originPath,data,'utf8');   
-                
-            tools.isFunction(callback)?callback():null;
+        constructor(fileName){
+            this.fileName = fileName;
+            this.writeDistance = 10;   
+            this.runStartTime = new Date().getTime();
         }
 
-    }     
-function isWaitingEnd(){
-    const nowTime = new Date().getTime();
-    if(nowTime - runStartTime >= writeDistance * 1000){
-        runStartTime = nowTime;
-        return true;
-    }else{
-        return false;
-    }
+        write(data,callback){
+            if(this.isWaitingEnd()){
+   
+                console.log(`writed：${this.fileName} at `,tools.dateFormat('mm:ss')); 
 
-}
+                const originPath = path.resolve(__dirname,`../../db/${this.fileName}`);
+              
+                fs.appendFileSync(originPath,data,'utf8');   
+                    
+                tools.isFunction(callback)?callback():null;
+                
+            }
+        }
+        isWaitingEnd(){
+            const nowTime = new Date().getTime();
+            if(nowTime - this.runStartTime >= this.writeDistance * 1000){
+                this.runStartTime = nowTime;
+                return true;
+            }else{
+                return false;
+            }
+        
+        }
+    }     
 
 

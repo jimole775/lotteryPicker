@@ -2,7 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const verifySeriesNum = require('./verifyNumSeries.js');
-const intervalWriter = require('../utils/intervalWriter.js');
+const IntervalWriter = require('../utils/IntervalWriter.js');
+const tools = require('../utils/tools.js');
 // 10000000组 tenMillion.json
 // 1000000组 oneMillion.json
 // 100000组 hundredThousand.json
@@ -13,7 +14,8 @@ const intervalWriter = require('../utils/intervalWriter.js');
 // 1组 theOne.json
 
 
-let tenMillionBatch = 5000000;
+let aBillion = 1000000000;
+let tenMillionBatch = 10000000;
 let oneMillionBatch = 1000000;
 let hundredThousandBatch = 100000;
 let tenThousandBatch = 10000;
@@ -21,6 +23,14 @@ let oneThousandBatch = 1000;
 let hundredBatch = 100;
 let tenBatch = 10;
 let theOneBatch = 1;       
+
+
+
+const no1Writer = new IntervalWriter('awardState.no1.log');
+const no2Writer = new IntervalWriter('awardState.no2.log');
+const no3Writer = new IntervalWriter('awardState.no3.log');
+const no4Writer = new IntervalWriter('awardState.no4.log');
+
 fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),function(err,frontData){
     fs.readFile(path.resolve(__dirname,'../../db/behind_rate_foundation.json'),function(err,behindData){     
         const frontRateFoun = JSON.parse(frontData.toString());
@@ -37,36 +47,38 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
         }
 
         function matchRightBatch(fronts,behinds){
-            let keepFetch = true;
             let awardState = {
                 no1:{
                     awardTimes:0,  
                     awardDistance:[],
-                    rollTimes:0
+                    peerAwardInRollTimes:0
                 },
                 no2:{
                     awardTimes:0,  
                     awardDistance:[],
-                    rollTimes:0                      
+                    peerAwardInRollTimes:0           
                 },
                 no3:{
                     awardTimes:0,  
                     awardDistance:[],
-                    rollTimes:0                     
+                    peerAwardInRollTimes:0          
                 },
                 no4:{
                     awardTimes:0,  
                     awardDistance:[],
-                    rollTimes:0                      
-                }
+                    peerAwardInRollTimes:0               
+                },
+                rollTimeSum:0
             };
-            while(keepFetch){
+            while(aBillion--){
+                awardState.rollTimeSum ++;
                 let frontMatchedTimes = 0;
                 let behindMatchedTimes = 0;
                 let batch = createABatch();   
-                var seriesItem = verifySeriesNum(batch);
-
+                var seriesItem = verifySeriesNum(batch,awardState.rollTimeSum);
+                // 如果有连号超过3次，就废弃这个摇号
                 if(seriesItem.length > 2){
+                    aBillion ++;
                     continue;
                 }
                 batch.forEach(function(item,index){
@@ -77,40 +89,50 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                     }
                 });
 
-                awardState.no1.rollTimes++;
-                awardState.no2.rollTimes++;
-                awardState.no3.rollTimes++;
-                awardState.no4.rollTimes++;
-                if(frontMatchedTimes === 5 && behindMatchedTimes === 2){
-                    console.log('中得一等奖',batch.toString());           
-                    afterAwarded(awardState.no1,1);  
+                awardState.no1.peerAwardInRollTimes++;
+                awardState.no2.peerAwardInRollTimes++;
+                awardState.no3.peerAwardInRollTimes++;
+                awardState.no4.peerAwardInRollTimes++;
+                if(frontMatchedTimes === 5 && behindMatchedTimes === 2){       
+                    afterAwarded(awardState.no1,1,awardState.rollTimeSum);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 1){   
-                    console.log('中得二等奖',batch.toString());   
-                    // afterAwarded(awardState.no2,2);  
+                    afterAwarded(awardState.no2,2,awardState.rollTimeSum);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 0
                     || frontMatchedTimes === 4 && behindMatchedTimes === 2){   
-                        // afterAwarded(awardState.no3,3);  
+                        afterAwarded(awardState.no3,3,awardState.rollTimeSum);  
                 } 
                 if(frontMatchedTimes === 4 && behindMatchedTimes === 1
                     || frontMatchedTimes === 3 && behindMatchedTimes === 2){ 
-                        // afterAwarded(awardState.no4,4);    
+                        afterAwarded(awardState.no4,4,awardState.rollTimeSum);    
                 } 
 
             }
         }
-        function afterAwarded(awardStateTab,awardLevel){
+
+        
+        function afterAwarded(awardStateTab,awardLevel,rollTimeSum){
  
             awardStateTab.awardTimes ++;
-            awardStateTab.awardDistance.push(awardStateTab.rollTimes);
-            awardStateTab.rollTimes = 0;    
-            var writeData = `awardState.no${awardLevel} awardDistance:${JSON.stringify(awardStateTab.awardDistance)}\n`;        
-            intervalWriter(`awardState`,writeData,function(){
+            awardStateTab.awardDistance.push(awardStateTab.peerAwardInRollTimes);
+            awardStateTab.peerAwardInRollTimes = 0;    
+            const writeData = `rollTimeSum:${rollTimeSum} awardDistance:${JSON.stringify(awardStateTab.awardDistance)}\n`; 
+            const writerMap = {
+                1:no1Writer,
+                2:no2Writer,
+                3:no3Writer,
+                4:no4Writer
+            }        
+            writerMap[awardLevel].write(writeData,function(){
+                reset();
+            });              
+            
+            function reset(){
                 awardStateTab.awardTimes = 0;
-                awardStateTab.awardDistance = [];
-                awardStateTab.rollTimes = 0;   
-            });   
+                awardStateTab.awardDistance.length = 0;
+                awardStateTab.peerAwardInRollTimes = 0;   
+            }
         }
 
         function createABatch(){
