@@ -13,11 +13,11 @@ module.exports = class IntervalWriter{
 
         write(data,callback){
 
-            this.cacheBuffer.push(Buffer.from(data));
+            this.cacheBuffer.push(data);
 
             if(this.isWaitingEnd()){
 
-                console.log(`writed：${this.cacheBuffer} at `,tools.dateFormat('mm:ss')); 
+                console.log(`writed：${this.cacheBuffer}`); 
                 
                 const originPath = path.resolve(__dirname,`../../db/${this.fileName}`);
               
