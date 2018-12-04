@@ -68,10 +68,15 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                     awardDistance:[],
                     peerAwardInRollTimes:0               
                 },
-                rollTimeSum:0
+                rollTimeSum:[],
+                rollTimeCalc:0
             };
             while(aBillion--){
-                awardState.rollTimeSum ++;
+                awardState.rollTimeCalc ++;
+                if(awardState.rollTimeCalc >= 10000000){
+                    awardState.rollTimeSum.push('i'); 
+                    awardState.rollTimeCalc = 0;
+                }
                 let frontMatchedTimes = 0;
                 let behindMatchedTimes = 0;
                 let batch = createABatch();   
@@ -94,14 +99,14 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 awardState.no3.peerAwardInRollTimes++;
                 awardState.no4.peerAwardInRollTimes++;
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 2){  
-                    afterAwarded(awardState.no1,1,awardState.rollTimeSum);  
+                    afterAwarded(awardState.no1,1,awardState.rollTimeSum,awardState.rollTimeCalc);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 1){   
-                    afterAwarded(awardState.no2,2,awardState.rollTimeSum);  
+                    afterAwarded(awardState.no2,2,awardState.rollTimeSum,awardState.rollTimeCalc);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 0
                     || frontMatchedTimes === 4 && behindMatchedTimes === 2){   
-                        afterAwarded(awardState.no3,3,awardState.rollTimeSum);  
+                        afterAwarded(awardState.no3,3,awardState.rollTimeSum,awardState.rollTimeCalc);  
                 } 
                 if(frontMatchedTimes === 4 && behindMatchedTimes === 1
                     || frontMatchedTimes === 3 && behindMatchedTimes === 2){ 
@@ -112,21 +117,19 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
         }
 
         
-        function afterAwarded(awardStateTab,awardLevel,rollTimeSum){
+        function afterAwarded(awardStateTab,awardLevel,rollTimeSum,rollTimeCalc){
  
             awardStateTab.awardTimes ++;
-            awardStateTab.awardDistance.push(awardStateTab.peerAwardInRollTimes);
+            awardStateTab.awardDistance.push(awardStateTab.peerAwardInRollTimes.toString());
             awardStateTab.peerAwardInRollTimes = 0;    
-            const writeData = `rollTimeSum:${rollTimeSum} awardDistance:${JSON.stringify(awardStateTab.awardDistance)}\n`; 
+            const writeData = `rollTimeSum:${rollTimeSum.join('') + rollTimeCalc} awardDistance:${JSON.stringify(awardStateTab.awardDistance)}`; 
             const writerMap = {
                 1:no1Writer,
                 2:no2Writer,
                 3:no3Writer,
                 4:no4Writer
-            }        
-            awardStateTab.awardTimes = 0;
+            }
             awardStateTab.awardDistance.length = 0;
-            awardStateTab.peerAwardInRollTimes = 0;   
             writerMap[awardLevel].write(writeData)
         }
 

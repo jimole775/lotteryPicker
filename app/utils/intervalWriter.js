@@ -7,26 +7,26 @@ module.exports = class IntervalWriter{
         constructor(fileName){
             this.cacheBuffer = [];
             this.fileName = fileName;
-            this.writeDistance = 10;   
+            this.writeDistance = 5;   
             this.runStartTime = new Date().getTime();
         }
 
         write(data,callback){
-            
-            if(this.isWaitingEnd()){
-   
-                console.log(`writed：${this.fileName} at `,tools.dateFormat('mm:ss')); 
 
+            this.cacheBuffer.push(Buffer.from(data));
+
+            if(this.isWaitingEnd()){
+
+                console.log(`writed：${this.cacheBuffer} at `,tools.dateFormat('mm:ss')); 
+                
                 const originPath = path.resolve(__dirname,`../../db/${this.fileName}`);
               
-                fs.appendFileSync(originPath,this.cacheBuffer.toString(),'utf8');   
-                    
+                fs.appendFileSync(originPath, this.cacheBuffer.join('\n').toString() + '\n','utf8');
+                
                 this.cacheBuffer.length = 0;
                 
                 tools.isFunction(callback)?callback():null;
                 
-            }else{
-                this.cacheBuffer.push(Buffer.from(data));
             }
         }
         isWaitingEnd(){
@@ -39,6 +39,6 @@ module.exports = class IntervalWriter{
             }
         
         }
-    }     
+}     
 
 

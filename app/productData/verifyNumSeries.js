@@ -51,11 +51,11 @@ module.exports = function(aTerm){
         
     }
         
-    if(frontSeriesMap[frontKey] >= 100000 || behindSeriesMap[behindkey] >= 100000){
+    if(frontSeriesMap[frontKey] >= 1000000 || behindSeriesMap[behindkey] >= 1000000){
         
         let writeData = '';
-            if(frontKey){writeData += `[${frontKey}]:${frontSeriesMap[frontKey]}\n`;frontSeriesMap[frontKey] = 1}       
-            if(behindkey){writeData = writeData.replace(/\n/,' ') + `#[${behindkey}]:${behindSeriesMap[behindkey]}\n`;behindSeriesMap[behindkey] = 1}
+            if(frontKey){writeData += `[${frontKey}]:${frontSeriesMap[frontKey].toString()} `;frontSeriesMap[frontKey] = 1}       
+            if(behindkey){writeData += `#[${behindkey}]:${behindSeriesMap[behindkey].toString()}`;behindSeriesMap[behindkey] = 1}
             writer.write(writeData); 
     }
    
