@@ -4,15 +4,6 @@ const path = require('path');
 const verifySeriesNum = require('./verifyNumSeries.js');
 const IntervalWriter = require('../utils/IntervalWriter.js');
 const tools = require('../utils/tools.js');
-// 10000000组 tenMillion.json
-// 1000000组 oneMillion.json
-// 100000组 hundredThousand.json
-// 10000组 tenThousand.json
-// 1000组 oneThousand.json
-// 100组 hundred.json
-// 10组 ten.json
-// 1组 theOne.json
-
 
 let aBillion = 1000000000;
 let tenMillionBatch = 10000000;
@@ -25,53 +16,54 @@ let tenBatch = 10;
 let theOneBatch = 1;       
 
 
-// 01,23,24,28,33,#04,#05
-const awardTarget_front = [01,23,24,28,33];
-const awardTarget_behind = [04,05];
-const no1Writer = new IntervalWriter(`awardState.no1-${awardTarget_front.join('.')}#${awardTarget_behind.join('.')}.log`);
-const no2Writer = new IntervalWriter(`awardState.no2-${awardTarget_front.join('.')}#${awardTarget_behind.join('.')}.log`);
-const no3Writer = new IntervalWriter(`awardState.no3-${awardTarget_front.join('.')}#${awardTarget_behind.join('.')}.log`);
+// 14,19,23,27,34,#06,#12
+const awardTarget_front = [14,19,23,27,34];
+const awardTarget_behind = [06,12];
+const no1Writer = new IntervalWriter(`${awardTarget_front.join('.')}#${awardTarget_behind.join('.')}-awardState.no1.log`);
+const no2Writer = new IntervalWriter(`${awardTarget_front.join('.')}#${awardTarget_behind.join('.')}-awardState.no2.log`);
+const no3Writer = new IntervalWriter(`${awardTarget_front.join('.')}#${awardTarget_behind.join('.')}-awardState.no3.log`);
 // const no4Writer = new IntervalWriter('awardState.no4.log');
 
-fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),function(err,frontData){
-    fs.readFile(path.resolve(__dirname,'../../db/behind_rate_foundation.json'),function(err,behindData){     
+fs.readFile(path.resolve(__dirname,'../../db/baseStorage/front_rate_foundation.json'),function(err,frontData){
+    fs.readFile(path.resolve(__dirname,'../../db/baseStorage/behind_rate_foundation.json'),function(err,behindData){     
         const frontRateFoun = JSON.parse(frontData.toString());
         const behindRateFoun = JSON.parse(behindData.toString());
         // building('tenMillionBatch',10);
         // 07,10,22,23,33,#08,#11
         matchRightBatch(awardTarget_front,awardTarget_behind);
-        function building(type,times){
-            let i = times;
-            const ws = fs.createWriteStream(path.resolve(__dirname,'../../db/',type + '.log'),'utf8');
-            while(i--){
-                ws.write(createABatch().toString() + '\r\n');
-            }
-            ws.end();
-        }
+        // function building(type,times){
+        //     let i = times;
+        //     const ws = fs.createWriteStream(path.resolve(__dirname,'../../db/',type + '.log'),'utf8');
+        //     while(i--){
+        //         ws.write(createABatch().toString() + '\r\n');
+        //     }
+        //     ws.end();
+        // }
 
         function matchRightBatch(fronts,behinds){
             let awardState = {
                 no1:0,
                 no2:0,
                 no3:0,
-                no4:0,
+                // no4:0,
                 rollTimeSum:'',
                 rollTimeCalc:0
             };
             while(aBillion--){
                 awardState.rollTimeCalc ++;
-                if(awardState.rollTimeCalc >= 10000000){
+                if(awardState.rollTimeCalc >= 1000000){
                     awardState.rollTimeSum += 'i'; 
                     if(awardState.rollTimeSum.length > 10){
                         awardState.rollTimeSum = awardState.rollTimeSum.replace(/i{10}/g,'v');
-                        awardState.rollTimeSum = awardState.rollTimeSum.replace(/v{10}/g,'W');
+                        awardState.rollTimeSum = awardState.rollTimeSum.replace(/v{10}/g,'w');
+                        awardState.rollTimeSum = awardState.rollTimeSum.replace(/w{10}/g,'x');
                     }
                     awardState.rollTimeCalc = 0;
                 }
                 let frontMatchedTimes = 0;
                 let behindMatchedTimes = 0;
                 let batch = createABatch();   
-                var seriesItem = verifySeriesNum(batch);
+                var seriesItem = verifySeriesNum(batch,aBillion);
                 // 如果有连号超过3次，就废弃这个摇号
                 if(seriesItem.length > 2){
                     aBillion ++;
@@ -88,39 +80,37 @@ fs.readFile(path.resolve(__dirname,'../../db/front_rate_foundation.json'),functi
                 awardState.no1++;
                 awardState.no2++;
                 awardState.no3++;
-                // awardState.no4.peerAwardInRollTimes++;
+                // awardState.no4++;
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 2){  
-                    afterAwarded(awardState.no1,1,awardState.rollTimeSum,awardState.rollTimeCalc);
-                    awardState.no1 = 0;
+                    afterAwarded(awardState,1,awardState.rollTimeSum+awardState.rollTimeCalc);
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 1){   
-                    afterAwarded(awardState.no2,2,awardState.rollTimeSum,awardState.rollTimeCalc);  
-                    awardState.no2 = 0;
+                    afterAwarded(awardState,2,awardState.rollTimeSum+awardState.rollTimeCalc);  
                 } 
                 if(frontMatchedTimes === 5 && behindMatchedTimes === 0
                     || frontMatchedTimes === 4 && behindMatchedTimes === 2){   
-                        afterAwarded(awardState.no3,3,awardState.rollTimeSum,awardState.rollTimeCalc); 
-                        awardState.no3 = 0; 
+                        afterAwarded(awardState,3,awardState.rollTimeSum+awardState.rollTimeCalc); 
                 } 
                 if(frontMatchedTimes === 4 && behindMatchedTimes === 1
                     || frontMatchedTimes === 3 && behindMatchedTimes === 2){ 
-                        // afterAwarded(awardState.no4,4,awardState.rollTimeSum);    
+                        // afterAwarded(awardState,4,awardState.rollTimeSum);    
                 } 
 
             }
         }
 
         
-        function afterAwarded(peerAwardInRollTimes,awardLevel,rollTimeSum,rollTimeCalc){
- 
-            const writeData = `rollTimeSum:${rollTimeSum + rollTimeCalc} awardDistance:${peerAwardInRollTimes.toString()}`; 
+        function afterAwarded(awardState,awardLevel,rollTimeSum){ 
+            const writeData = `rollTimeSum:${rollTimeSum} awardDistance:${awardState['no' + awardLevel]}`; 
             const writerMap = {
                 1:no1Writer,
                 2:no2Writer,
                 3:no3Writer,
                 // 4:no4Writer
             }
-            writerMap[awardLevel].write(writeData)
+            awardState['no' + awardLevel] = 0;
+            writerMap[awardLevel].write(writeData);
+            // console.log('摇奖存储：',awardState);
         }
 
         function createABatch(){

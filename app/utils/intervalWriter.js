@@ -17,9 +17,9 @@ module.exports = class IntervalWriter{
 
             if(this.isWaitingEnd()){
 
-                console.log(`writed：${this.cacheBuffer}`); 
+                // console.log(`writed：${this.cacheBuffer}`); 
                 
-                const originPath = path.resolve(__dirname,`../../db/${this.fileName}`);
+                const originPath = path.resolve(__dirname,`../../db/award/${this.fileName}`);
               
                 fs.appendFileSync(originPath, this.cacheBuffer.join('\n').toString() + '\n','utf8');
                 
