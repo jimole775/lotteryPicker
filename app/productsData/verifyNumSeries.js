@@ -17,6 +17,7 @@ module.exports = function(aTerm,loopTimes){
     let frontSeries = [];
     let behindSeries = [];
     aTerm.forEach(function(item,index){
+        
         if(index <=4){
             let nextIndex = index+1 > 4 ? 4 : index+1; 
             let nextItem = aTerm[nextIndex];

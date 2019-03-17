@@ -2,7 +2,7 @@ const saveData = require('./app/requestData/saveData.js');
 const RequestHtml = require('./app/requestData/requestHtml.js');
 const analyzingHtml = require('./app/requestData/analyzingHtml.js');
 
-const pageSize = 89;
+const pageSize = 91;
 
 async function batchFetch(){
     for(let i = 1;i<=pageSize;i++){

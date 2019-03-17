@@ -1,7 +1,7 @@
 const readline = require('readline');
 const createSumForm = require('./app/analyData/createSumForm.js');
 const fs = require('fs');
-const rs = fs.createReadStream('./db/amount.txt');
+const rs = fs.createReadStream('./db/baseStorage/amount.txt');
 const rl = readline.createInterface({
     input: rs,
     crlfDelay: Infinity
@@ -9,7 +9,7 @@ const rl = readline.createInterface({
 let fronts = [];
 let behinds = [];
 let rowIndex = 0;
-rl.on('line', (line) => {    
+rl.on('line', function (line){ 
     let peerTerm = line.split(',');
     fronts[rowIndex] = [];
     behinds[rowIndex] = [];

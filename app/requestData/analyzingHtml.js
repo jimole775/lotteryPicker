@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 let countPage = 0;
-const logWs = fs.createWriteStream(path.resolve(__dirname,'../../db/html.log'),'utf8');
+const logWs = fs.createWriteStream(path.resolve(__dirname,'../../db/baseStorage/html.log'),'utf8');
 function analyzing(htmlStr){
     const tbodyStartIndex = htmlStr.indexOf('<tbody');
     const tbodyEndIndex = htmlStr.indexOf('</tbody>');

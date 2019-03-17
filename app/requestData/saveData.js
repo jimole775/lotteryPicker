@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 let pageIndex = 1;
-const ws = fs.createWriteStream(path.resolve('./','db/amount.txt'), 'utf-8');
+const ws = fs.createWriteStream(path.resolve('./','db/baseStorage/amount.txt'), 'utf-8');
 function writeData(peerPageData,pageSize){
     peerPageData.forEach(function(item){
         ws.write(item.toString() + '\n');
